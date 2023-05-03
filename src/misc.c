@@ -724,7 +724,7 @@ int valid_host(const char *host, int strict)
 				return 0;
 	} else {
 		for (p=host; *p; p++)
-			if (!isalnum(*p) && !strchr("_-.:/", *p))
+			if (!isalnum(*p) && !strchr("_-.:/", *p))
 				return 0;
 	}
 
