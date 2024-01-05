@@ -620,6 +620,30 @@ int InitUnrealIRCd(int argc, char *argv[])
 	corelim.rlim_cur = corelim.rlim_max = RLIM_INFINITY;
 	setrlimit(RLIMIT_CORE, &corelim);
 #endif
+	init_sys();
+
+#if !defined(_WIN32)
+#ifndef _WIN32
+	mkdir(TMPDIR, S_IRUSR|S_IWUSR|S_IXUSR); /* Create the tmp dir, if it doesn't exist */
+ 	mkdir(CACHEDIR, S_IRUSR|S_IWUSR|S_IXUSR); /* Create the cache dir, if it doesn't exist */
+#else
+	mkdir(TMPDIR);
+	mkdir(CACHEDIR);
+#endif
+	if (chdir(TMPDIR)) {
+# ifndef _WIN32
+		perror("chdir");
+		fprintf(stderr, "ERROR: Unable to change to directory '%s'\n", TMPDIR);
+# else
+		if (!IsService) {
+			MessageBox(NULL, strerror(GetLastError()),
+			    "UnrealIRCD/32: chdir()", MB_OK);
+		}
+# endif
+		exit(-1);
+	}
+#endif
+
 	/*
 	 * ** All command line parameters have the syntax "-fstring"
 	 * ** or "-f string" (e.g. the space is optional). String may
@@ -734,27 +758,6 @@ int InitUnrealIRCd(int argc, char *argv[])
 		}
 	}
 
-#if !defined(_WIN32)
-#ifndef _WIN32
-	mkdir(TMPDIR, S_IRUSR|S_IWUSR|S_IXUSR); /* Create the tmp dir, if it doesn't exist */
- 	mkdir(CACHEDIR, S_IRUSR|S_IWUSR|S_IXUSR); /* Create the cache dir, if it doesn't exist */
-#else
-	mkdir(TMPDIR);
-	mkdir(CACHEDIR);
-#endif
-	if (chdir(TMPDIR)) {
-# ifndef _WIN32
-		perror("chdir");
-		fprintf(stderr, "ERROR: Unable to change to directory '%s'\n", TMPDIR);
-# else
-		if (!IsService) {
-			MessageBox(NULL, strerror(GetLastError()),
-			    "UnrealIRCD/32: chdir()", MB_OK);
-		}
-# endif
-		exit(-1);
-	}
-#endif
 #ifndef _WIN32
 	/*
 	 * didn't set debuglevel
@@ -798,7 +801,7 @@ int InitUnrealIRCd(int argc, char *argv[])
 #ifndef _WIN32
 	fprintf(stderr, "\n");
 	fprintf(stderr, "This server can handle %d concurrent sockets (%d clients + %d reserve)\n\n",
-		maxclients+CLIENTS_RESERVE, maxclients, CLIENTS_RESERVE);
+		maxclients+reserved_fds, maxclients, reserved_fds);
 #endif
 	init_CommandHash();
 	initwhowas();
@@ -810,7 +813,6 @@ int InitUnrealIRCd(int argc, char *argv[])
 	(void)chmod(CPATH, DEFAULT_PERMISSIONS);
 #endif
 	init_dynconf();
-	init_sys();
 	clicap_init();
 	/*
 	 * Add default class

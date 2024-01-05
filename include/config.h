@@ -173,21 +173,6 @@
  #endif
 #endif
 
-/* Number of file descriptors reserved for non-incoming-clients.
- * One of which may be used by auth, the rest are really reserved.
- * They can be used for outgoing server links, listeners, logging,
- * DNS lookups, HTTPS callbacks, etc.
- */
-#if MAXCONNECTIONS >= 10000
- #define CLIENTS_RESERVE 250
-#elif MAXCONNECTIONS >= 2048
- #define CLIENTS_RESERVE 32
-#elif MAXCONNECTIONS >= 1024
- #define CLIENTS_RESERVE 16
-#else
- #define CLIENTS_RESERVE 8
-#endif
-
 /*
  * this defines the length of the nickname history.  each time a user changes
  * nickname or signs off, their old nickname is added to the top of the list.
@@ -298,6 +283,11 @@
 #else
 #define UNREALIRCD_DEFAULT_ECDH_CURVES "secp521r1:secp384r1:prime256v1"
 #endif
+
+/* These can be changed via set::central-spamfilter::url and ::feed */
+#define DEFAULT_CENTRAL_SPAMFILTER_URL_OPEN_ACCESS "https://spamfilter.unrealircd.org/spamfilter/v6/$feed/central_spamfilter.conf"
+#define DEFAULT_CENTRAL_SPAMFILTER_URL_RESTRICTED_ACCESS "https://spamfilter.unrealircd-api.org/spamfilter/v6/$feed/central_spamfilter.conf"
+#define DEFAULT_CENTRAL_SPAMFILTER_FEED "standard"
 
 /* These are just defaults, which you can override via set::dns */
 #define DNS_DEFAULT_CLIENT_TIMEOUT 1500
