@@ -1,8 +1,7 @@
-UnrealIRCd 6.1.5-git
+UnrealIRCd 6.1.5
 =================
 
-This is the git version (development version) for future 6.1.5. This is work
-in progress and may not always be a stable version.
+This is just a regular release with various enhancements and bug fixes.
 
 ### Enhancements:
 * You can now use 
@@ -20,12 +19,12 @@ in progress and may not always be a stable version.
   (e.g. for typing notifications).
 * Improved performance if you have hundreds of non-regex spamfilters.
 * Add more [Crule](https://www.unrealircd.org/docs/Crule) functions:
- * `is_away()` returns true if the client is currently away
- * `has_user_mode('x')` returns true if all the user modes are set on the
-   client.
- * `has_channel_mode('x')` can be used for spamfilters with a destination
-   channel, such as messages: it returns true if all specified channel modes
-   are set on the channel.
+  * `is_away()` returns true if the client is currently away
+  * `has_user_mode('x')` returns true if all the user modes are set on the
+    client.
+  * `has_channel_mode('x')` can be used for spamfilters with a destination
+    channel, such as messages: it returns true if all specified channel modes
+    are set on the channel.
 * Add `example.pt.conf` - (Brazilian) Portuguese example configuration file.
 
 ### Changes:
@@ -47,9 +46,6 @@ in progress and may not always be a stable version.
 * Removed confusing "Central blocklist too slow to respond" message when using
   [soft bans](https://www.unrealircd.org/docs/Soft_ban) or a
   [require authentication block](https://www.unrealircd.org/docs/Require_authentication_block).
-
-### Developers and protocol:
-* TODO
 
 UnrealIRCd 6.1.4
 -----------------
