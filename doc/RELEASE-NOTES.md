@@ -8,10 +8,16 @@ in progress and may not always be a stable version.
 * TODO
 
 ### Changes:
-* TODO
+* For many years `REHASH -all` is the same as `REHASH` so we now reject
+  the former.
 
 ### Fixes:
-* TODO
+* When booting for the first time (without any cached files) the IRCd
+  downloads GeoIP.dat. If that fails, e.g. due to lack of internet connectivity,
+  we now show a warning and continue booting instead of it being a hard error.
+  Note that we already dealt with this properly after the file has been cached
+  (so after first download), see "What if your web server is down" in
+  [Remote includes](https://www.unrealircd.org/docs/Remote_includes#What_if_your_web_server_is_down).
 
 ### Developers and protocol:
 * TODO
