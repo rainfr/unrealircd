@@ -5,7 +5,10 @@ This is the git version (development version) for future 6.1.6. This is work
 in progress and may not always be a stable version.
 
 ### Enhancements:
-* Add more [Crule](https://www.unrealircd.org/docs/Crule) functions:
+* [Crule](https://www.unrealircd.org/docs/Crule) functions can now do everything
+  that [security group blocks](https://www.unrealircd.org/docs/Security-group_block)
+  can do.  
+  In practice, this means the following functions were added in this release:
   * `is_tls()` returns true if the client is using SSL/TLS
   * `in_security_group('known-users')` returns true if the user is in the
     specified [security group](https://www.unrealircd.org/docs/Security-group_block).
@@ -13,6 +16,18 @@ in progress and may not always be a stable version.
     returns true if client matches mask.
   * `match_ip('192.168.*')` or with CIDR like `match_ip('192.168.0.0/16')`
     returns true if IP address of client matches.
+  * `is_identified()` which returns true if the client is identified to a services account.
+  * `is_webirc()` which returns true if the client is connected using WEBIRC.
+  * `is_websocket()` which returns true if the client is connected using WebSockets.
+  * `match_realname('*xyz*')` which returns true if the real name (gecos)
+     contains xyz.
+  * `match_account('xyz')` which returns true if the services account name is xyz.
+  * `match_country('NL')` which returns true if 
+    [GeoIP](https://www.unrealircd.org/docs/GeoIP) determined the
+    country to be NL.
+  * `match_certfp('abc')` which returns true if the 
+    [Certificate fingerprint](https://www.unrealircd.org/docs/Certificate_fingerprint)
+    is abc.
 
 ### Changes:
 * For many years `REHASH -all` is the same as `REHASH` so we now reject
@@ -22,12 +37,16 @@ in progress and may not always be a stable version.
   functions. The old name will keep working for the entire UnrealIRCd 6 series too.
 
 ### Fixes:
+* Crash if you first REHASH and have a parse error (failed rehash 1) and then
+  REHASH again but a remote include fails to load (failed rehash 2).
 * Crash on Windows when using
   [Crule](https://www.unrealircd.org/docs/Crule) functions,
   [Central Spamreport](https://www.unrealircd.org/docs/Central_spamreport) or
   [Central Spamfilter](https://www.unrealircd.org/docs/Central_Spamfilter).
 * [Conditional config](https://www.unrealircd.org/docs/Defines_and_conditional_config):
   using @if with a variable like `@if $VAR == "something"` always evaluated to false.
+* A [`~forward`](https://www.unrealircd.org/docs/Extended_bans#Group_2:_actions)
+  ban did not check ban exemptions (+e), always forwarding the user.
 * When booting for the first time (without any cached files) the IRCd
   downloads GeoIP.dat. If that fails, e.g. due to lack of internet connectivity,
   we now show a warning and continue booting instead of it being a hard error.
