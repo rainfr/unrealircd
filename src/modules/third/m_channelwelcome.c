@@ -1,9 +1,4 @@
-/* m_channelwelcome: Sends custom welcome messages for different channels
-** Based on the provided template
-*/
-
 #include "unrealircd.h"
-
 #define MYCONF "channel-welcome"
 #define MAX_WELCOME_MSG 512 // Define the maximum length for the welcome message
 
@@ -30,7 +25,7 @@ ModuleHeader MOD_HEADER = {
 	"third/m_channelwelcome", // Module name
 	"1.0.0", // Version
 	"Sends custom welcome messages for different channels", // Description
-	"ChatGPTUser", // Author
+	"reverse", // Author
 	"unrealircd-6", // Modversion
 };
 
