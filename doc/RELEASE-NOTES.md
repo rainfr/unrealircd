@@ -1,8 +1,32 @@
-UnrealIRCd 6.1.6-rc1
-=====================
+UnrealIRCd 6.1.7-git
+=================
 
-This is the Release Candidate for future UnrealIRCd 6.1.6.  
-Please report any issues at https://bugs.unrealircd.org/
+This is the git version (development version) for future 6.1.7. This is work
+in progress and may not always be a stable version.
+
+### Enhancements:
+* New option [set::tls::certificate-expiry-notification](https://www.unrealircd.org/docs/Set_block#set::tls::certificate-expiry-notification):
+  since UnrealIRCd 5.0.8 we warn if a SSL/TLS certificate is (nearly) expired.
+  This new option allows turning it off, it is (still) on by default.
+
+### Changes:
+* IRCOps with the operclass `locop` can now only `REHASH` the local server
+  and not remote servers.
+* Comment out some more in example.conf by default
+
+### Fixes:
+* TODO
+
+### Developers and protocol:
+* TODO
+
+UnrealIRCd 6.1.6
+-----------------
+
+This is mostly a bug fix release but also comes with Crule enhancements.
+
+UnrealIRCd turned 25 a few weeks ago! 🎉 See
+[UnrealIRCd celebrates its 25th birthday](https://forums.unrealircd.org/viewtopic.php?t=9363).
 
 ### Enhancements:
 * [Crule](https://www.unrealircd.org/docs/Crule) functions can now do everything
