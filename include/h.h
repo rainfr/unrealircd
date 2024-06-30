@@ -809,8 +809,9 @@ extern MODVAR int (*tkl_chartotype)(char c);
 extern MODVAR char (*tkl_configtypetochar)(const char *name);
 extern MODVAR const char *(*tkl_type_string)(TKL *tk);
 extern MODVAR const char *(*tkl_type_config_string)(TKL *tk);
-extern MODVAR TKL *(*tkl_add_serverban)(int type, const char *usermask, const char *hostmask, const char *reason, const char *setby,
-                                            time_t expire_at, time_t set_at, int soft, int flags);
+extern MODVAR TKL *(*tkl_add_serverban)(int type, const char *usermask, const char *hostmask, SecurityGroup *match,
+                                        const char *reason, const char *setby,
+                                        time_t expire_at, time_t set_at, int soft, int flags);
 extern MODVAR TKL *(*tkl_add_banexception)(int type, const char *usermask, const char *hostmask, SecurityGroup *match,
                                            const char *reason, const char *set_by,
                                            time_t expire_at, time_t set_at, int soft, const char *bantypes, int flags);
@@ -929,7 +930,7 @@ extern MODVAR void (*crule_free)(CRuleNode **);
 extern MODVAR const char *(*crule_errstring)(int errcode);
 extern MODVAR void (*ban_act_set_reputation)(Client *client, BanAction *action);
 extern MODVAR const char *(*get_central_api_key)(void);
-extern MODVAR int (*central_spamreport)(Client *target, Client *by);
+extern MODVAR int (*central_spamreport)(Client *target, Client *by, const char *url);
 extern MODVAR int (*central_spamreport_enabled)(void);
 extern MODVAR void (*sasl_succeeded)(Client *client);
 extern MODVAR void (*sasl_failed)(Client *client);
@@ -989,7 +990,7 @@ extern void cancel_ident_lookup_default_handler(Client *client);
 extern int spamreport_default_handler(Client *client, const char *ip, NameValuePrioList *details, const char *spamreport_block, Client *by);
 extern void ban_act_set_reputation_default_handler(Client *client, BanAction *action);
 extern const char *get_central_api_key_default_handler(void);
-extern int central_spamreport_default_handler(Client *target, Client *by);
+extern int central_spamreport_default_handler(Client *target, Client *by, const char *url);
 extern int central_spamreport_enabled_default_handler(void);
 extern void sasl_succeeded_default_handler(Client *client);
 extern void sasl_failed_default_handler(Client *client);
@@ -1295,6 +1296,7 @@ extern int security_group_exists(const char *name);
 extern SecurityGroup *add_security_group(const char *name, int order);
 extern SecurityGroup *find_security_group(const char *name);
 extern void free_security_group(SecurityGroup *s);
+#define safe_free_security_group(x) do { if (x) { free_security_group(x); x = NULL; } } while(0)
 extern SecurityGroup *duplicate_security_group(SecurityGroup *s);
 extern void set_security_group_defaults(void);
 extern int user_allowed_by_security_group(Client *client, SecurityGroup *s);

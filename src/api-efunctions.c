@@ -54,7 +54,8 @@ char (*tkl_configtypetochar)(const char *name);
 const char *(*tkl_type_string)(TKL *tk);
 const char *(*tkl_type_config_string)(TKL *tk);
 char *(*tkl_uhost)(TKL *tkl, char *buf, size_t buflen, int options);
-TKL *(*tkl_add_serverban)(int type, const char *usermask, const char *hostmask, const char *reason, const char *setby,
+TKL *(*tkl_add_serverban)(int type, const char *usermask, const char *hostmask, SecurityGroup *match,
+                              const char *reason, const char *setby,
                               time_t expire_at, time_t set_at, int soft, int flags);
 TKL *(*tkl_add_nameban)(int type, const char *name, int hold, const char *reason, const char *setby,
                             time_t expire_at, time_t set_at, int flags);
@@ -172,7 +173,7 @@ void (*crule_free)(CRuleNode **);
 const char *(*crule_errstring)(int errcode);
 void (*ban_act_set_reputation)(Client *client, BanAction *action);
 const char *(*get_central_api_key)(void);
-int (*central_spamreport)(Client *target, Client *by);
+int (*central_spamreport)(Client *target, Client *by, const char *url);
 int (*central_spamreport_enabled)(void);
 void (*sasl_succeeded)(Client *client);
 void (*sasl_failed)(Client *client);
