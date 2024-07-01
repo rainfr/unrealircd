@@ -617,7 +617,7 @@ AS_IF([test "x$PRIVATELIBDIR" != "x"], [rm -f "$PRIVATELIBDIR/"libpcre2*])],[has
 
 AS_IF([test "$has_system_pcre2" = "no"], [
 dnl REMEMBER TO CHANGE WITH A NEW PCRE2 RELEASE!
-pcre2_version="10.42"
+pcre2_version="10.44"
 AC_MSG_RESULT(extracting PCRE2 regex library)
 cur_dir=`pwd`
 cd extras
@@ -707,7 +707,7 @@ AS_IF([test "x$PRIVATELIBDIR" != "x"], [rm -f "$PRIVATELIBDIR/"libsodium*])],[ha
 
 AS_IF([test "$has_system_sodium" = "no"],[
 dnl REMEMBER TO CHANGE WITH A NEW SODIUM RELEASE!
-sodium_version="1.0.18"
+sodium_version="1.0.20"
 AC_MSG_RESULT(extracting sodium library)
 cur_dir=`pwd`
 cd extras
@@ -757,9 +757,7 @@ AS_IF([test "x$PRIVATELIBDIR" != "x"], [rm -f "$PRIVATELIBDIR/"libcares*])],[has
 
 AS_IF([test "$has_system_cares" = "no"], [
 dnl REMEMBER TO CHANGE WITH A NEW C-ARES RELEASE!
-dnl NOTE: when changing this here, ALSO change it in extras/curlinstall
-dnl       and in the comment in this file around line 400!
-cares_version="1.19.1"
+cares_version="1.31.0"
 AC_MSG_RESULT(extracting c-ares resolver library)
 cur_dir=`pwd`
 cd extras
