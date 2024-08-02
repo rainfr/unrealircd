@@ -1160,7 +1160,7 @@ int tkl_ip_change(Client *client, const char *oldip)
 {
 	TKL *tkl;
 	if ((tkl = find_tkline_match_zap(client)))
-		banned_client(client, "Z-Lined", tkl->ptr.serverban->reason, (tkl->type & TKL_GLOBAL)?1:0, 0);
+		banned_client(client, "Z-Lined", tkl->ptr.serverban->reason, (tkl->type & TKL_GLOBAL)?1:0, NO_EXIT_CLIENT);
 	return 0;
 }
 
@@ -5167,21 +5167,6 @@ TKL *choose_winning_spamfilter(TKL *one, TKL *two)
 	return (one->ptr.spamfilter->target > two->ptr.spamfilter->target) ? one : two;
 }
 
-/** Checks if 'target' is on the spamfilter exception list.
- * RETURNS 1 if found in list, 0 if not.
- */
-static int target_is_spamexcept(const char *target)
-{
-	SpamExcept *e;
-
-	for (e = iConf.spamexcept; e; e = e->next)
-	{
-		if (match_simple(e->name, target))
-			return 1;
-	}
-	return 0;
-}
-
 /** Make user join the virus channel.
  * @param client  The user that was doing something bad.
  * @param tk    The TKL entry that matched this user.
@@ -5273,10 +5258,6 @@ static void match_spamfilter_hit(Client *client, const char *str_in, const char 
 	int stopped;
 	int highest_action;
 
-	/* Perhaps it's on the exceptions list? */
-	if (!*winner_tkl && destination && target_is_spamexcept(destination))
-		return; /* No problem! */
-
 	if (match_spamfilter_exempt(tkl, user_is_exempt_general, user_is_exempt_central))
 	{
 		tkl->ptr.spamfilter->hits_except++;
@@ -5362,6 +5343,7 @@ int _match_spamfilter(Client *client, const char *str_in, int target, const char
 	int stop_processing_general_spamfilters = 0;
 	int stop_processing_central_spamfilters = 0;
 	int content_revealed = 0;
+	crule_context context;
 
 	if (rettkl)
 		*rettkl = NULL; /* initialize to NULL */
@@ -5380,13 +5362,21 @@ int _match_spamfilter(Client *client, const char *str_in, int target, const char
 	if (!client->user || ValidatePermissionsForPath("immune:server-ban:spamfilter",client,NULL,NULL,NULL) || IsULine(client))
 		return 0;
 
+	memset(&context, 0, sizeof(context));
+	context.client = client;
+	context.text = str_in;
+	context.destination = destination;
+
 	/* Client exempt from spamfilter checking?
 	 * Let's check that early: going through elines is likely faster than running the regex(es).
 	 */
-	if (find_tkl_exception(TKL_SPAMF, client))
+	if (find_tkl_exception(TKL_SPAMF, client) ||
+	    (iConf.spamfilter_except && user_allowed_by_security_group_context(client, iConf.spamfilter_except, &context)))
+	{
 		user_is_exempt_general = 1;
+	}
 
-	if (user_allowed_by_security_group(client, iConf.central_spamfilter_except))
+	if (user_allowed_by_security_group_context(client, iConf.central_spamfilter_except, &context))
 		user_is_exempt_central = 1;
 
 	for (tkl = tklines[tkl_hash('F')]; tkl; tkl = tkl->next)
@@ -5420,22 +5410,16 @@ int _match_spamfilter(Client *client, const char *str_in, int target, const char
 		/* Run any pre 'rule' if there is any (false means 'no hit') */
 		if (tkl->ptr.spamfilter->rule)
 		{
-			crule_context context;
-			memset(&context, 0, sizeof(context));
-			context.client = client;
-			context.text = str_in;
-			context.destination = destination;
 			if (!crule_eval(&context, tkl->ptr.spamfilter->rule))
 				continue;
 		}
 
 		/* Check any 'except' rule if there is any (true means 'no hit') */
-		if (tkl->ptr.spamfilter->except && user_allowed_by_security_group(client, tkl->ptr.spamfilter->except))
+		if (tkl->ptr.spamfilter->except && user_allowed_by_security_group_context(client, tkl->ptr.spamfilter->except, &context))
 			continue;
 
 		if (tkl->ptr.spamfilter->match && (tkl->ptr.spamfilter->match->type != MATCH_NONE))
 		{
-			// TODO: wait, why are we running slow spamfilter detection for simple (non-regex) too ?
 #ifdef SPAMFILTER_DETECTSLOW
 			if (tkl->ptr.spamfilter->match->type == MATCH_PCRE_REGEX)
 			{

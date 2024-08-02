@@ -158,6 +158,12 @@ extern ConfigItem_help 	*find_Help(const char *command);
 
 extern OperPermission ValidatePermissionsForPath(const char *path, Client *client, Client *victim, Channel *channel, const void *extra);
 extern void OperClassValidatorDel(OperClassValidator *validator);
+extern OperClassACLPath *OperClass_parsePath(const char *path);
+extern OperClassACL *OperClass_FindACL(OperClassACL *acl, char *name);
+extern OperPermission ValidatePermissionsForPathEx(OperClassACL *acl, OperClassACLPath *path, OperClassCheckParams *params);
+extern void OperClass_freePath(OperClassACLPath *path);
+extern OperClassACL *_conf_parseACL(const char *name, ConfigEntry *ce);
+extern void free_operclass_struct(OperClass *o);
 
 extern ConfigItem_ban  *find_ban_ip(Client *client);
 extern void add_ListItem(ListStruct *, ListStruct **);
@@ -1072,9 +1078,11 @@ extern int inet_pton6(const char *src, unsigned char *dst);
 extern const char *compressed_ip(const char *ip);
 extern int unreal_bind(int fd, const char *ip, int port, SocketType socket_type);
 extern int unreal_connect(int fd, const char *ip, int port, SocketType socket_type);
+extern const char *socket_type_valtostr(SocketType t);
 extern int is_valid_ip(const char *str);
 extern int ipv6_capable(void);
 extern int unix_sockets_capable(void);
+extern int set_client_ip(Client *client, const char *ip);
 #ifdef _WIN32
 extern void init_winsock(void);
 #endif
@@ -1300,6 +1308,7 @@ extern void free_security_group(SecurityGroup *s);
 extern SecurityGroup *duplicate_security_group(SecurityGroup *s);
 extern void set_security_group_defaults(void);
 extern int user_allowed_by_security_group(Client *client, SecurityGroup *s);
+extern int user_allowed_by_security_group_context(Client *client, SecurityGroup *s, crule_context *context);
 extern int user_allowed_by_security_group_name(Client *client, const char *secgroupname);
 extern const char *get_security_groups(Client *client);
 extern int test_match_item(ConfigFile *conf, ConfigEntry *cep, int *errors);

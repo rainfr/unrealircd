@@ -1,8 +1,42 @@
-UnrealIRCd 6.1.7-git
-=================
+UnrealIRCd 6.1.8-git
+===============
 
-This is the git version (development version) for future 6.1.7. This is work
+This is the git version (development version) for future 6.1.8. This is work
 in progress and may not always be a stable version.
+
+### Enhancements:
+* TODO
+
+### Changes:
+* TODO
+
+### Fixes:
+* TODO
+
+### Developers and protocol:
+* TODO
+
+UnrealIRCd 6.1.7.1
+-------------------
+UnrealIRCd 6.1.7.1 is a quick dot release a few days after 6.1.7 to do two things:
+* Add country and ASN support in `WHOWAS`
+* Fix an annoying "[BUG] trying to modify fd -2 in fd table" message that
+  appeared to IRCOps sometimes. It was harmless and only happened if you
+  were using a recent version of the c-ares library (1.31.0 from June 18 2024
+  or later, which also is the one we ship with as fallback if the system
+  has no c-ares library installed).
+
+See the release notes for 6.1.7 below, from a couple of days ago, for a lot
+more features that were recently added.
+
+UnrealIRCd 6.1.7
+-----------------
+
+This is UnrealIRCd 6.1.7 stable. It comes with ASN support, more flexible
+ban user { } and require authentication { } blocks and more.
+
+UnrealIRCd recently turned 25 years! 🎉 See
+[UnrealIRCd celebrates its 25th birthday](https://forums.unrealircd.org/viewtopic.php?t=9363).
 
 ### Enhancements:
 * In the [ban user { }](https://www.unrealircd.org/docs/Ban_user_block)
@@ -11,9 +45,55 @@ in progress and may not always be a stable version.
   [Mask item](https://www.unrealircd.org/docs/Mask_item).
   This means you can use all the power of mask items and security groups and
   multiple matching criteria.
+* The GeoIP module now contains information about
+  [Autonomous System Numbers](https://www.unrealircd.org/docs/ASN):
+   * The asn is shown in the user connecting notice as `[asn: ###]`,
+     is shown in `WHOIS` (for IRCOps) and it is expanded in JSON data such as
+     [JSON Logging](https://www.unrealircd.org/docs/JSON_logging) and
+     [JSON-RPC](https://www.unrealircd.org/docs/JSON-RPC) calls like
+     `user.list`.
+  * Can be used in [Extended server ban](https://www.unrealircd.org/docs/Extended_server_bans):
+    `GLINE ~asn:64496 0 This ISP is banned`.
+  * Can be used in security groups and [mask items](https://www.unrealircd.org/docs/Mask_item)
+    so you can do like:
+    ```
+    require authentication {
+        mask { asn { 64496; 64497; 64498; } }
+        reason "Too much abuse from this ISP. You are required to log in with an account using SASL.";
+    }
+    ```
+   * In [Crule](https://www.unrealircd.org/docs/Crule) functions as `match_asn(64496)`
+   * Also available in regular extbans/invex, but normally users don't
+     know the IP or ASN of other users, unless you use no cloaking or
+     change [set::whois-details::asn](https://www.unrealircd.org/docs/Set_block#set::whois-details).
+* [JSON-RPC](https://www.unrealircd.org/docs/JSON-RPC):
+  Similar to oper and operclass, in an
+  [rpc-user](https://www.unrealircd.org/docs/Rpc-user_block) you now have
+  to specify an rpc-user::rpc-class. The rpc-class is defined in an
+  [rpc-class block](https://www.unrealircd.org/docs/Rpc-class_block)
+  and configures what JSON methods can be called.  
+  There are two default json-rpc classes:
+  * `full`: access to all JSON-RPC Methods
+  * `read-only`: access to things like *server_ban.list* but not to *server_ban.add*
+* [set::spamfilter::except](https://www.unrealircd.org/docs/Set_block#set::spamfilter::except)
+  is now a [Mask item](https://www.unrealircd.org/docs/Mask_item) instead of
+  only a list of exempted targets. A warning is created to existing users
+  along with a suggestion of how to use the new syntax. Technically, this is
+  not really new functionality as all this was already possible via
+  the [Except ban block](https://www.unrealircd.org/docs/Except_ban_block)
+  with type spamfilter, but it is more visible/logical to have this also.
+* New option [set::hide-killed-by](https://www.unrealircd.org/docs/Set_block#set::hide-killed-by):
+  We normally show the nickname of the oper who did the /KILL in the quit message.
+  When set to `yes` the quit message becomes shortened to "Killed (Reason)".
+  This can prevent oper harassment.
+* [set::restrict-commands](https://www.unrealircd.org/docs/Restrict_commands):
+  new option `channel-create` for managing who may create new channels.
 * New option [set::tls::certificate-expiry-notification](https://www.unrealircd.org/docs/Set_block#set::tls::certificate-expiry-notification):
   since UnrealIRCd 5.0.8 we warn if a SSL/TLS certificate is (nearly) expired.
   This new option allows turning it off, it is (still) on by default.
+* Add the ability to capture the same data as
+  [Central Spamreport](https://www.unrealircd.org/docs/Central_spamreport)
+  by providing an spamreport::url option.
 
 ### Changes:
 * IRCOps with the operclass `locop` can now only `REHASH` the local server
@@ -23,11 +103,14 @@ in progress and may not always be a stable version.
   Sodium to 1.0.20
 
 ### Fixes:
+* Crash when removing the `websocket` option on a websocket listener.
 * Silence some compiler warnings regarding deprecation of c-ares API in
   src/dns.c.
+* Memory leaks of around 1-2KB per rehash
 
 ### Developers and protocol:
-* TODO
+* We use numeric 569 (RPL_WHOISASN) for displaying ASN info to IRCOps:  
+  `:irc.example.net 569 x whoiseduser 64496 :is connecting from AS64496 [Example Corp]`
 
 UnrealIRCd 6.1.6
 -----------------

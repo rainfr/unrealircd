@@ -273,6 +273,7 @@ int is_blacklisted_module(const char *name);
 int modules_default_conf_modified(const char *filebuf);
 int config_item_allowed_for_config_file(const char *resource, const char *item);
 void remove_config_tkls(int flag);
+void free_operclass_struct(OperClass *o);
 
 /** Return the printable string of a 'cep' location, such as set::something::xyz */
 const char *config_var(ConfigEntry *cep)
@@ -1673,7 +1674,7 @@ void free_iConf(Configuration *i)
 	safe_free(i->level_on_join);
 	safe_free(i->spamfilter_ban_reason);
 	safe_free(i->spamfilter_virus_help_channel);
-	// spamexcept is freed elsewhere
+	safe_free_security_group(i->spamfilter_except);
 	safe_free(i->spamexcept_line);
 	safe_free(i->reject_message_too_many_connections);
 	safe_free(i->reject_message_server_full);
@@ -2445,6 +2446,7 @@ void free_all_proxy_blocks(void)
 void config_rehash()
 {
 	ConfigItem_oper			*oper_ptr;
+	ConfigItem_operclass		*operclass_ptr;
 	ConfigItem_class 		*class_ptr;
 	ConfigItem_ulines 		*uline_ptr;
 	ConfigItem_allow 		*allow_ptr;
@@ -2463,7 +2465,6 @@ void config_rehash()
 	ConfigItem_sni			*sni;
 	OperStat 			*os_ptr;
 	ListStruct 	*next, *next2;
-	SpamExcept *spamex_ptr;
 
 	USE_BAN_VERSION = 0;
 
@@ -2486,7 +2487,6 @@ void config_rehash()
 		safe_free(oper_ptr->auto_join);
 		Auth_FreeAuthConfig(oper_ptr->auth);
 		free_security_group(oper_ptr->match);
-		DelListItem(oper_ptr, conf_oper);
 		for (s = oper_ptr->swhois; s; s = s_next)
 		{
 			s_next = s->next;
@@ -2494,7 +2494,16 @@ void config_rehash()
 			safe_free(s->setby);
 			safe_free(s);
 		}
+		DelListItem(oper_ptr, conf_oper);
 		safe_free(oper_ptr);
+	}
+
+	for (operclass_ptr = conf_operclass; operclass_ptr; operclass_ptr = (ConfigItem_operclass *)next)
+	{
+		next = (ListStruct *)operclass_ptr->next;
+		free_operclass_struct(operclass_ptr->classStruct);
+		DelListItem(operclass_ptr, conf_operclass);
+		safe_free(operclass_ptr);
 	}
 
 	for (link_ptr = conf_link; link_ptr; link_ptr = (ConfigItem_link *) next)
@@ -2680,12 +2689,6 @@ void config_rehash()
 		safe_free(os_ptr);
 	}
 	iConf.allow_user_stats_ext = NULL;
-	for (spamex_ptr = iConf.spamexcept; spamex_ptr; spamex_ptr = (SpamExcept *)next)
-	{
-		next = (ListStruct *)spamex_ptr->next;
-		safe_free(spamex_ptr);
-	}
-	iConf.spamexcept = NULL;
 	for (of_ptr = conf_offchans; of_ptr; of_ptr = (ConfigItem_offchans *)next)
 	{
 		next = (ListStruct *)of_ptr->next;
@@ -4040,6 +4043,58 @@ OperClassACL* _conf_parseACL(const char *name, ConfigEntry *ce)
 	return acl;
 }
 
+/** Free previously allocated _conf_parseACLEntry() */
+void free_acl_entry(OperClassACLEntry *e)
+{
+	OperClassACLEntryVar *v, *v_next;
+
+	for (v = e->variables; v; v = v_next)
+	{
+		v_next = v->next;
+		safe_free(v->name);
+		safe_free(v->value);
+		safe_free(v);
+	}
+	safe_free(e);
+}
+
+/** Free previously allocated _conf_parseACL() */
+void free_operclass_acls(OperClassACL *acl)
+{
+	OperClassACL *acl_next;
+	OperClassACLEntry *x, *x_next;
+	OperClassACL *sub, *sub_next;
+
+	for (; acl; acl = acl_next)
+	{
+		acl_next = acl->next;
+		for (x = acl->entries; x; x = x_next)
+		{
+			x_next = x->next;
+			DelListItem(x, acl->entries);
+			free_acl_entry(x);
+		}
+		acl->entries = NULL;
+		for (sub = acl->acls; sub; sub = sub_next)
+		{
+			sub_next = sub->next;
+			DelListItem(sub, acl->acls);
+			free_operclass_acls(sub);
+		}
+		acl->acls = NULL;
+		safe_free(acl->name);
+		safe_free(acl);
+	}
+}
+
+void free_operclass_struct(OperClass *o)
+{
+	free_operclass_acls(o->acls);
+	safe_free(o->ISA);
+	safe_free(o->name);
+	safe_free(o);
+}
+
 int	_conf_operclass(ConfigFile *conf, ConfigEntry *ce)
 {
 	ConfigEntry *cep;
@@ -4124,7 +4179,7 @@ int 	_test_operclass(ConfigFile *conf, ConfigEntry *ce)
 			if (has_permissions)
 			{
 				config_warn_duplicate(cep->file->filename,
-				cep->line_number, "oper::permissions");
+				cep->line_number, "operclass::permissions");
 				continue;
 			}
 			has_permissions = 1;
@@ -4147,7 +4202,7 @@ int 	_test_operclass(ConfigFile *conf, ConfigEntry *ce)
 	if (!has_permissions)
 	{
 		config_error_missing(ce->file->filename, ce->line_number,
-			"oper::permissions");
+			"operclass::permissions");
 		errors++;
 	}
 
@@ -5360,6 +5415,7 @@ void conf_listen_configure(const char *ip, int port, SocketType socket_type, int
 	}
 	safe_free_webserver(listen->webserver);
 	free_entire_name_list(listen->websocket_origin);
+	listen->websocket_options = 0;
 	// NOTE: duplicate code overlap with listen_cleanup()
 
 	/* Now set the new settings: */
@@ -5681,6 +5737,13 @@ int	_test_listen(ConfigFile *conf, ConfigEntry *ce)
 
 			has_port = 1;
 
+			if (strchr(cep->value, ','))
+			{
+				config_error("%s:%i: listen::port does not support comma's",
+				             cep->file->filename, cep->line_number);
+				errors++;
+				continue;
+			}
 			port_range(cep->value, &start, &end);
 			if (start == end)
 			{
@@ -5688,7 +5751,8 @@ int	_test_listen(ConfigFile *conf, ConfigEntry *ce)
 				{
 					config_error("%s:%i: listen: illegal port (must be 1..65535)",
 						cep->file->filename, cep->line_number);
-					return 1;
+					errors++;
+					continue;
 				}
 			}
 			else
@@ -5697,7 +5761,8 @@ int	_test_listen(ConfigFile *conf, ConfigEntry *ce)
 				{
 					config_error("%s:%i: listen: illegal port range end value is less than starting value",
 						cep->file->filename, cep->line_number);
-					return 1;
+					errors++;
+					continue;
 				}
 				if (end - start >= 100)
 				{
@@ -5705,13 +5770,15 @@ int	_test_listen(ConfigFile *conf, ConfigEntry *ce)
 						"(and thus consumes %d sockets) this is probably not what you want.",
 						cep->file->filename, cep->line_number, start, end,
 						end - start + 1, end - start + 1);
-					return 1;
+					errors++;
+					continue;
 				}
 				if ((start < 1) || (start > 65535) || (end < 1) || (end > 65535))
 				{
 					config_error("%s:%i: listen: illegal port range values must be between 1 and 65535",
 						cep->file->filename, cep->line_number);
-					return 1;
+					errors++;
+					continue;
 				}
 			}
 
@@ -7946,6 +8013,9 @@ int	_conf_set(ConfigFile *conf, ConfigEntry *ce)
 			else if (!strcmp(cep->value, "auto"))
 				tempiConf.hide_ban_reason = HIDE_BAN_REASON_AUTO;
 		}
+		else if (!strcmp(cep->name, "hide-killed-by")) {
+			tempiConf.hide_killed_by = config_checkval(cep->value, CFG_YESNO);
+		}
 		else if (!strcmp(cep->name, "prefix-quit")) {
 			if (!strcmp(cep->value, "0") || !strcmp(cep->value, "no"))
 				safe_free(tempiConf.prefix_quit);
@@ -8138,19 +8208,20 @@ int	_conf_set(ConfigFile *conf, ConfigEntry *ce)
 					tempiConf.spamfilter_vchan_deny = config_checkval(cepp->value,CFG_YESNO);
 				else if (!strcmp(cepp->name, "except"))
 				{
-					char *name, *p;
-					SpamExcept *e;
-					safe_strdup(tempiConf.spamexcept_line, cepp->value);
-					for (name = strtoken(&p, cepp->value, ","); name; name = strtoken(&p, NULL, ","))
+					if (cepp->value && !tempiConf.spamfilter_except)
 					{
-						if (*name == ' ')
-							name++;
-						if (*name)
+						/* OLD set::spamfilter::except compatibility code when it was "#chan,xyz" */
+						char buf[512], *p = NULL, *name;
+						strlcpy(buf, cepp->value, sizeof(buf));
+						tempiConf.spamfilter_except = safe_alloc(sizeof(SecurityGroup));
+						for (name = strtoken(&p, buf, ","); name; name = strtoken(&p, NULL, ","))
 						{
-							e = safe_alloc(sizeof(SpamExcept) + strlen(name));
-							strcpy(e->name, name);
-							AddListItem(e, tempiConf.spamexcept);
+							skip_whitespace(&name);
+							add_name_list(tempiConf.spamfilter_except->destination, name);
 						}
+					} else {
+						/* New set::spamfilter::except code, where it is a mask item */
+						conf_match_block(conf, cepp, &tempiConf.spamfilter_except);
 					}
 				}
 				else if (!strcmp(cepp->name, "detect-slow-warn"))
@@ -8755,6 +8826,10 @@ int	_test_set(ConfigFile *conf, ConfigEntry *ce)
 				continue;
 			}
 		}
+		else if (!strcmp(cep->name, "hide-killed-by")) {
+			CheckNull(cep);
+			CheckDuplicate(cep, hide_killed_by, "hide-killed-by");
+		}
 		else if (!strcmp(cep->name, "restrict-channelmodes"))
 		{
 			CheckNull(cep);
@@ -9287,6 +9362,23 @@ int	_test_set(ConfigFile *conf, ConfigEntry *ce)
 		else if (!strcmp(cep->name, "spamfilter")) {
 			for (cepp = cep->items; cepp; cepp = cepp->next)
 			{
+				if (!strcmp(cepp->name, "except"))
+				{
+					if (cepp->value)
+					{
+						/* Old compatibility code */
+						config_warn("%s: %d: set::spamfilter::except is now a mask item. "
+						            "Your setting has been read correctly but please update your item "
+						            "because future UnrealIRCd versions will make this an error. "
+						            "Update your item to use this style: "
+						            "except { destination { \"#chan1\"; \"#chan2\"; \"SomeNick\"; } }",
+						            cepp->file->filename, cepp->line_number);
+						config_warn("For more information, see https://www.unrealircd.org/docs/Set_block#set::spamfilter::except");
+					} else {
+						test_match_block(conf, cepp, &errors);
+					}
+					continue; // needed, because we are above the CheckNull and the multiple if's below.
+				}
 				CheckNull(cepp);
 				if (!strcmp(cepp->name, "ban-time"))
 				{
@@ -9322,10 +9414,6 @@ int	_test_set(ConfigFile *conf, ConfigEntry *ce)
 				if (!strcmp(cepp->name, "virus-help-channel-deny"))
 				{
 					CheckDuplicate(cepp, spamfilter_virus_help_channel_deny, "spamfilter::virus-help-channel-deny");
-				} else
-				if (!strcmp(cepp->name, "except"))
-				{
-					CheckDuplicate(cepp, spamfilter_except, "spamfilter::except");
 				} else
 #ifdef SPAMFILTER_DETECTSLOW
 				if (!strcmp(cepp->name, "detect-slow-warn"))
@@ -10016,10 +10104,12 @@ void start_listeners(void)
 {
 	ConfigItem_listen *listener;
 	int failed = 0, ports_bound = 0;
-	char boundmsg_ipv4[512], boundmsg_ipv6[512];
+	char boundmsg_ipv4[512];
+	char boundmsg_ipv6[512];
+	char boundmsg_unix[512];
 	int last_errno = 0;
 
-	*boundmsg_ipv4 = *boundmsg_ipv6 = '\0';
+	*boundmsg_ipv4 = *boundmsg_ipv6 = *boundmsg_unix = '\0';
 
 	for (listener = conf_listen; listener; listener = listener->next)
 	{
@@ -10034,10 +10124,19 @@ void start_listeners(void)
 			} else {
 				if (loop.booted)
 				{
-					unreal_log(ULOG_INFO, "listen", "LISTEN_ADDED", NULL,
-					           "UnrealIRCd is now also listening on $listen_ip:$listen_port",
-					           log_data_string("listen_ip", listener->ip),
-					           log_data_integer("listen_port", listener->port));
+					if (listener->socket_type == SOCKET_TYPE_UNIX)
+					{
+						unreal_log(ULOG_INFO, "listen", "LISTEN_ADDED", NULL,
+							   "UnrealIRCd is now also listening on $listen_file [$protocol]",
+							   log_data_string("listen_file", listener->file),
+							   log_data_string("protocol", socket_type_valtostr(listener->socket_type)));
+					} else {
+						unreal_log(ULOG_INFO, "listen", "LISTEN_ADDED", NULL,
+							   "UnrealIRCd is now also listening on $listen_ip:$listen_port [$protocol]",
+							   log_data_string("listen_ip", listener->ip),
+							   log_data_integer("listen_port", listener->port),
+							   log_data_string("protocol", socket_type_valtostr(listener->socket_type)));
+					}
 				} else {
 					switch (listener->socket_type)
 					{
@@ -10051,7 +10150,11 @@ void start_listeners(void)
 								"%s:%d%s, ", listener->ip, listener->port,
 								listener->options & LISTENER_TLS ? "(TLS)" : "");
 							break;
-						// TODO: show unix domain sockets ;)
+						case SOCKET_TYPE_UNIX:
+							snprintf(boundmsg_unix+strlen(boundmsg_unix), sizeof(boundmsg_unix)-strlen(boundmsg_unix),
+								"%s%s, ", listener->file,
+								listener->options & LISTENER_TLS ? "(TLS)" : "");
+							break;
 						default:
 							break;
 					}
@@ -10104,18 +10207,24 @@ void start_listeners(void)
 			boundmsg_ipv4[strlen(boundmsg_ipv4)-2] = '\0';
 		if (strlen(boundmsg_ipv6) > 2)
 			boundmsg_ipv6[strlen(boundmsg_ipv6)-2] = '\0';
+		if (strlen(boundmsg_unix) > 2)
+			boundmsg_unix[strlen(boundmsg_unix)-2] = '\0';
 
 		if (!*boundmsg_ipv4)
 			strlcpy(boundmsg_ipv4, "<none>", sizeof(boundmsg_ipv4));
 		if (!*boundmsg_ipv6)
 			strlcpy(boundmsg_ipv6, "<none>", sizeof(boundmsg_ipv6));
+		if (!*boundmsg_unix)
+			strlcpy(boundmsg_unix, "<none>", sizeof(boundmsg_unix));
 
 		unreal_log(ULOG_INFO, "listen", "LISTENING", NULL,
 		           "UnrealIRCd is now listening on the following addresses/ports:\n"
 		           "IPv4: $ipv4_port_list\n"
-		           "IPv6: $ipv6_port_list\n",
+		           "IPv6: $ipv6_port_list\n"
+		           "Unix Sockets: $unix_socket_list\n",
 		           log_data_string("ipv4_port_list", boundmsg_ipv4),
-		           log_data_string("ipv6_port_list", boundmsg_ipv6));
+		           log_data_string("ipv6_port_list", boundmsg_ipv6),
+		           log_data_string("unix_socket_list", boundmsg_unix));
 	}
 }
 
