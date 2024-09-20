@@ -5,6 +5,30 @@ This is the git version (development version) for future 6.1.8. This is work
 in progress and may not always be a stable version.
 
 ### Enhancements:
+* We now support vhost::auto-login, which means you can set vhosts on users
+  automatically and we support variables in vhost::vhost (this works similar
+  to Gottem's autovhost module).
+  * An example would be:  
+    ```
+    /* Give users who identify to Services using SASL a nice vhost */
+    vhost {
+        auto-login yes;
+        vhost $account.example.net;
+        mask { identified yes; }
+    }
+    ```
+  * On-connect we will go through all vhost blocks that have auto-login
+    set to yes. Blocks are processed in the same order as they are in
+    the config (top-down). The first match wins.
+  * The variables that are supported now use a generic framework called
+    [Standard variables](https://www.unrealircd.org/docs/Standard_variables)
+  * At the moment these can be used in vhost::vhost, oper::vhost,
+    blacklist::reason and set::oper-vhost
+* New option [set::oper-vhost](https://www.unrealircd.org/docs/Set_block#set::oper-vhost)
+  which sets a default oper::vhost. For example:
+  `set { oper-vhost $operclass.admin.example.net; }`
+  * If both set::oper-vhost and oper::vhost are present, the oper::vhost
+    takes precedence.
 * New [Extended ban](https://www.unrealircd.org/docs/Extended_bans#Group_4:_special)
   to inherit channel bans from another channel:
   * If in channel `#test` you add `+b ~inherit:#main` then anyone banned in
@@ -17,18 +41,32 @@ in progress and may not always be a stable version.
     1 by default, see 
     [set::max-inherit-extended-bans](https://www.unrealircd.org/docs/Set_block#set::max-inherit-extended-bans)
   * This can also be used in `+I`, which entries are counted separately and
-    have their own limit. (TODO: `+e` still needs to be done)
+    have their own limit.
+* JSON-RPC:
+  * New call [`log.send`](https://www.unrealircd.org/docs/JSON-RPC:Log#log.send)
+    to send a log message / server notice.
 
 ### Changes:
 * When retrieving cold or hot patches we now do proper GPG/PGP checks.
   Just like we do on `./unrealircd upgrade`
 * Update shipped libraries: c-ares to 1.33.1
+* Move +/- 1000 lines of code from core to modules (regarding
+  throttling, maxperip, vhost, exit_client).
 
 ### Fixes:
+* In some circumstances users could hang during the handshake when
+  their DNS lookup result was cached and using c-ares 1.31.0 or later
+  (which was released on June 18 2024 and shipped with UnrealIRCd 6.1.7
+  to be used as a fallback for systems which don't have the c-ares
+  library installed).
 * The [require authentication { }](https://www.unrealircd.org/docs/Require_authentication_block)
   was broken in 6.1.7.*.
 * [JSON-RPC](https://www.unrealircd.org/docs/JSON-RPC) call `spamfilter.get`
   could not retrieve information about config-based spamfilters.
+* The `decode_authenticate_plain()` was reading OOB. This function is not
+  used by UnrealIRCd itself but could affect third party modules.
+* Crash on invalid server-to-server command regarding `REHASH`
+  (This only affected trusted linked servers)
 
 ### Developers and protocol:
 * The `MD` S2S command now supports `BIGLINES`, allowing synching of 16K

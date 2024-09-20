@@ -100,7 +100,6 @@ extern MODVAR ConfigItem_tld		*conf_tld;
 extern MODVAR ConfigItem_oper		*conf_oper;
 extern MODVAR ConfigItem_listen	*conf_listen;
 extern MODVAR ConfigItem_allow		*conf_allow;
-extern MODVAR ConfigItem_vhost		*conf_vhost;
 extern MODVAR ConfigItem_link		*conf_link;
 extern MODVAR ConfigItem_sni		*conf_sni;
 extern MODVAR ConfigItem_ban		*conf_ban;
@@ -150,7 +149,6 @@ extern ConfigItem_tld		*find_tld(Client *cptr);
 extern ConfigItem_link		*find_link(const char *servername);
 extern ConfigItem_ban 		*find_ban(Client *, const char *host, short type);
 extern ConfigItem_ban 		*find_banEx(Client *,const char *host, short type, short type2);
-extern ConfigItem_vhost	*find_vhost(const char *name);
 extern ConfigItem_deny_channel *find_channel_allowed(Client *cptr, const char *name);
 extern ConfigItem_alias	*find_alias(const char *name);
 extern ConfigItem_help 	*find_Help(const char *command);
@@ -698,6 +696,7 @@ extern void verify_opercount(Client *, const char *);
 extern int valid_host(const char *host, int strict);
 extern int valid_username(const char *username);
 extern int valid_vhost(const char *userhost);
+extern int potentially_valid_vhost(const char *userhost);
 extern int count_oper_sessions(const char *);
 extern char *unreal_mktemp(const char *dir, const char *suffix);
 extern char *unreal_getpathname(const char *filepath, char *path);
@@ -932,6 +931,7 @@ extern MODVAR void (*exit_client)(Client *client, MessageTag *recv_mtags, const 
 extern MODVAR void (*exit_client_fmt)(Client *client, MessageTag *recv_mtags, FORMAT_STRING(const char *pattern), ...) __attribute__((format(printf, 3, 4)));
 extern MODVAR void (*exit_client_ex)(Client *client, Client *origin, MessageTag *recv_mtags, const char *comment);
 extern MODVAR void (*banned_client)(Client *client, const char *bantype, const char *reason, int global, int noexit);
+extern MODVAR char (*unreal_expand_string)(const char *str, char *buf, size_t buflen, NameValuePrioList *nvp, int buildvarstring_options, Client *client);
 /* /Efuncs */
 
 /* TLS functions */
