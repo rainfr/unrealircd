@@ -42,6 +42,9 @@ in progress and may not always be a stable version.
     [set::max-inherit-extended-bans](https://www.unrealircd.org/docs/Set_block#set::max-inherit-extended-bans)
   * This can also be used in `+I`, which entries are counted separately and
     have their own limit.
+* In the [ban ip { }](https://www.unrealircd.org/docs/Ban_IP_block)
+  and the [ban nick { }](https://www.unrealircd.org/docs/Ban_nick_block)
+  you can now have multiple masks.
 * JSON-RPC:
   * New call [`log.send`](https://www.unrealircd.org/docs/JSON-RPC:Log#log.send)
     to send a log message / server notice.
@@ -52,6 +55,11 @@ in progress and may not always be a stable version.
 * Update shipped libraries: c-ares to 1.33.1
 * Move +/- 1000 lines of code from core to modules (regarding
   throttling, maxperip, vhost, exit_client).
+* [Security group blocks](https://www.unrealircd.org/docs/Security-group_block)
+  are now hidden in lists by default. If you want the security group to be shown
+  in things like `MODE #channel +b ~security-group:x` (which shows a list)
+  then you need to use `public yes;`. The default security groups
+  like known-users, webirc-users, etc. are public by default.
 
 ### Fixes:
 * In some circumstances users could hang during the handshake when
