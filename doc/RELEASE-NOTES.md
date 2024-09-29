@@ -1,8 +1,10 @@
-UnrealIRCd 6.1.8-git
-===============
+UnrealIRCd 6.1.8-rc1
+=====================
 
-This is the git version (development version) for future 6.1.8. This is work
-in progress and may not always be a stable version.
+This is the Release Candidate (RC) for future UnrealIRCd version 6.1.8.
+The actual 6.1.8 stable release will be around mid-October.
+Testing of this RC is appreciated. If you find anything, please report
+the issue at https://bugs.unrealircd.org.
 
 ### Enhancements:
 * New [Extended ban](https://www.unrealircd.org/docs/Extended_bans#Group_4:_special)
@@ -18,7 +20,8 @@ in progress and may not always be a stable version.
     [set::max-inherit-extended-bans](https://www.unrealircd.org/docs/Set_block#set::max-inherit-extended-bans)
   * This can also be used in `+I`, which entries are counted separately and
     have their own limit.
-* We now support vhost::auto-login, which means you can set vhosts on users
+* [Vhosts](https://www.unrealircd.org/docs/Vhost_block):
+  We now support vhost::auto-login, which means you can set vhosts on users
   automatically and we support variables in vhost::vhost (this works similar
   to Gottem's autovhost module).
   * An example would be:  
@@ -26,13 +29,15 @@ in progress and may not always be a stable version.
     /* Give users who identify to Services using SASL a nice vhost */
     vhost {
         auto-login yes;
-        vhost $account.example.net;
+        vhost $account.users.example.net;
         mask { identified yes; }
     }
     ```
   * On-connect we will go through all vhost blocks that have auto-login
     set to yes. Blocks are processed in the same order as they are in
     the config (top-down). The first match wins.
+  * Note that you could already use Services to do this task.
+    This is just an extra feature so you can also do it in UnrealIRCd itself.
   * The variables that are supported now use a generic framework called
     [Standard variables](https://www.unrealircd.org/docs/Standard_variables)
   * At the moment these can be used in vhost::vhost, oper::vhost,
