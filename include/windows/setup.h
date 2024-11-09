@@ -41,7 +41,12 @@
 #define HAVE_EXPLICIT_BZERO
 #define HAVE_STRNLEN
 #define explicit_bzero(a,b) SecureZeroMemory(a,b)
+#define HAS_ASN1_TIME_diff
 #define HAS_SSL_CTX_SET1_CURVES_LIST
+#define HAS_SSL_CTX_SET_MIN_PROTO_VERSION
+#define HAS_SSL_CTX_SET_SECURITY_LEVEL
+#define HAS_X509_check_host
+#define HAS_X509_get0_notAfter
 
 /* mode_t: Needed in s_conf.c for the third argument of open(3p).
  * Should be an int because of http://msdn.microsoft.com/en-us/library/z0kc8e3z(VS.71).aspx
