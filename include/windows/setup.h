@@ -41,6 +41,7 @@
 #define HAVE_EXPLICIT_BZERO
 #define HAVE_STRNLEN
 #define explicit_bzero(a,b) SecureZeroMemory(a,b)
+#define HAS_SSL_CTX_SET1_CURVES_LIST
 
 /* mode_t: Needed in s_conf.c for the third argument of open(3p).
  * Should be an int because of http://msdn.microsoft.com/en-us/library/z0kc8e3z(VS.71).aspx
