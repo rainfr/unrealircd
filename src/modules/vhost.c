@@ -334,7 +334,7 @@ static int stats_vhost(Client *client, const char *flag)
 	ConfigItem_vhost *vhosts;
 	NameValuePrioList *m;
 
-	if (strcmp(flag, "S") && strcasecmp(flag, "vhost"))
+	if (strcmp(flag, "V") && strcasecmp(flag, "vhost"))
 		return 0; /* Not for us */
 
 	for (vhosts = conf_vhost; vhosts; vhosts = vhosts->next)
@@ -345,7 +345,7 @@ static int stats_vhost(Client *client, const char *flag)
 			               vhosts->virtuser ? vhosts->virtuser : "",
 			               vhosts->virtuser ? "@" : "",
 			               vhosts->virthost,
-			               vhosts->login,
+			               vhosts->login ? vhosts->login : "*",
 			               namevalue_nospaces(m));
 		}
 	}
