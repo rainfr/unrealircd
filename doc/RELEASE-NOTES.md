@@ -17,23 +17,24 @@ in UnrealIRCd 6.1.8/6.1.8.1 and 100% CPU usage in some circumstances.
 * The Windows version did not allow tweaking of set::tls::ecdh-curves.
 
 ### Changes:
-* Update shipped libraries: c-ares to 1.34.3
-* Update Windows libraries: c-ares to 1.34.3, curl to 8.11.0 and
-  LibreSSL to 4.0.0.
-* Added `HELPOP EXTSERVERBANS` to explain
-  [Extended server bans](https://www.unrealircd.org/docs/Extended_server_bans)
+* SSL/TLS: Only allow AES in GCM mode and no longer in CBC mode.
+* When using cURL for remote includes we now explicitly set the minimum
+  required version to TLSv1.2 and set our default ciphers and ciphersuites.
+  Note that by default in UnrealIRCd 6 the built-in (non-cURL) implementation
+  is used for remote includes, which already uses the same defaults since
+  6.0.0. Also note that most distros, like Ubuntu and Debian, already disabled
+  TLSv1.2 effectively in cURL.
 * Regarding ecdh-curves with the default configuration: we now try setting
   the curves list to `x25519:secp521r1:secp384r1:prime256v1` first, and if
   that fails then we try `secp521r1:secp384r1:prime256v1`. The former could
   fail due to SSL library restrictions (old library or when in FIPS mode).
   Previously we were also supposed to do it like that, but due to a bug
   always had X25519 turned off.
-* When using cURL for remote includes we now explicitly disable TLSv1.2
-  and set our default ciphers and ciphersuites. Note that by default in
-  UnrealIRCd 6 the built-in (non-cURL) implementation is used for remote
-  includes, which already uses the same defaults since 6.0.0. Also note
-  that most distros, like Ubuntu and Debian, already disabled TLSv1.2
-  in the default openssl conf and thus it was already disabled in cURL.
+* Update shipped libraries: c-ares to 1.34.3
+* Update Windows libraries: c-ares to 1.34.3, curl to 8.11.0 and
+  LibreSSL to 4.0.0.
+* Added `HELPOP EXTSERVERBANS` to explain
+  [Extended server bans](https://www.unrealircd.org/docs/Extended_server_bans)
 
 ### Developers and protocol:
 * No changes
