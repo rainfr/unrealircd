@@ -22,6 +22,12 @@ in UnrealIRCd 6.1.8/6.1.8.1 and 100% CPU usage in some circumstances.
   LibreSSL to 4.0.0.
 * Added `HELPOP EXTSERVERBANS` to explain
   [Extended server bans](https://www.unrealircd.org/docs/Extended_server_bans)
+* Regarding ecdh-curves with the default configuration: we now try setting
+  the curves list to `x25519:secp521r1:secp384r1:prime256v1` first, and if
+  that fails then we try `secp521r1:secp384r1:prime256v1`. The former could
+  fail due to SSL library restrictions (old library or when in FIPS mode).
+  Previously we were also supposed to do it like that, but due to a bug
+  always had X25519 turned off.
 
 ### Developers and protocol:
 * No changes

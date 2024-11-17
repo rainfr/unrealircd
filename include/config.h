@@ -267,14 +267,12 @@
 
 /* Default TLS curves for ECDH(E)
  * This can be changed via set::ssl::options::ecdh-curve in the config file.
- * NOTE: This requires openssl 1.0.2 or newer, otherwise these defaults
- *       are not applied, due to the missing openssl API call.
+ * The UNREALIRCD_DEFAULT_ECDH_CURVES_PRIMARY is tried first, and then the
+ * UNREALIRCD_DEFAULT_ECDH_CURVES_SECONDARY, since tha latter requires
+ * openssl 1.1.0 or newer.
  */
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-#define UNREALIRCD_DEFAULT_ECDH_CURVES "X25519:secp521r1:secp384r1:prime256v1"
-#else
-#define UNREALIRCD_DEFAULT_ECDH_CURVES "secp521r1:secp384r1:prime256v1"
-#endif
+#define UNREALIRCD_DEFAULT_ECDH_CURVES_PRIMARY "X25519:secp521r1:secp384r1:prime256v1"
+#define UNREALIRCD_DEFAULT_ECDH_CURVES_SECONDARY "secp521r1:secp384r1:prime256v1"
 
 /* These can be changed via set::central-spamfilter::url and ::feed */
 #define DEFAULT_CENTRAL_SPAMFILTER_URL_OPEN_ACCESS "https://spamfilter.unrealircd.org/spamfilter/v6/$feed/central_spamfilter.conf"
