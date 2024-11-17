@@ -1,5 +1,9 @@
-UnrealIRCd 6.1.8.1
+UnrealIRCd 6.1.9-git
 ===================
+This is the git version.
+
+UnrealIRCd 6.1.8.1
+-------------------
 UnrealIRCd 6.1.8.1 is a dot release, it fixes:
 * If you have a vhost block without vhost::login, because you use the
   new auto-vhost functionality, then the IRCd will crash upon
