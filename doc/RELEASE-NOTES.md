@@ -2,6 +2,30 @@ UnrealIRCd 6.1.9-git
 ===================
 This is the git version.
 
+This release fixes a number of bugs such as IPv6 hosts not resolving
+in UnrealIRCd 6.1.8/6.1.8.1 and 100% CPU usage in some circumstances.
+
+### Enhancements:
+* None
+
+### Fixes:
+* IPv6 hosts not resolving in UnrealIRCd 6.1.8 and 6.1.8.1.
+* 100% CPU usage in some (rare) circumstances. The IRCd is still fully
+  responsive, but of course high CPU usage is never good.
+* Crash in `STATS S` (IRCOp-only) if having vhosts with autologin
+  (and no vhost::login).
+* The Windows version did not allow tweaking of set::tls::ecdh-curves.
+
+### Changes:
+* Update shipped libraries: c-ares to 1.34.3
+* Update Windows libraries: c-ares to 1.34.3, curl to 8.11.0 and
+  LibreSSL to 4.0.0.
+* Added `HELPOP EXTSERVERBANS` to explain
+  [Extended server bans](https://www.unrealircd.org/docs/Extended_server_bans)
+
+### Developers and protocol:
+* No changes
+
 UnrealIRCd 6.1.8.1
 -------------------
 UnrealIRCd 6.1.8.1 is a dot release, it fixes:
