@@ -871,6 +871,10 @@ static int fatal_tls_error(int ssl_error, int where, int my_errno, Client *clien
 	char buf[512];
 	const char *one, *two;
 
+	/* deregister I/O notification since we don't care anymore. the actual closing of socket will happen later. */
+	if (client->local->fd >= 0)
+		fd_unnotify(client->local->fd);
+
 	if (IsDeadSocket(client))
 		return -1;
 
@@ -953,10 +957,6 @@ static int fatal_tls_error(int ssl_error, int where, int my_errno, Client *clien
 		SET_ERRNO(P_EIO);
 		safe_strdup(client->local->error_str, ssl_errstr);
 	}
-
-	/* deregister I/O notification since we don't care anymore. the actual closing of socket will happen later. */
-	if (client->local->fd >= 0)
-		fd_unnotify(client->local->fd);
 
 	return -1;
 }
