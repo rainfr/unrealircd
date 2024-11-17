@@ -4,21 +4,23 @@ This is the git version.
 
 This release fixes a number of bugs such as IPv6 hosts not resolving
 in UnrealIRCd 6.1.8/6.1.8.1 and 100% CPU usage in some circumstances.
+It also changes the SSL/TLS defaults to make things a little safer/better.
 
 ### Enhancements:
 * SSL/TLS:
-  * [By default](https://www.unrealircd.org/docs/TLS_Ciphers_and_protocols)
-    only allow AES in GCM mode and no longer in CBC mode.
-  * When using cURL for remote includes we now explicitly set the minimum
-    required version to TLSv1.2 and set our default ciphers and ciphersuites.
+  * Change [default TLS ciphers](https://www.unrealircd.org/docs/TLS_Ciphers_and_protocols)
+    to only allow AES in GCM mode and no longer in CBC mode.
+  * When using cURL for [remote includes](https://www.unrealircd.org/docs/Remote_includes)
+    we now explicitly set the minimum required version to TLSv1.2 and set our
+    default ciphers and ciphersuites.
     Note that by default in UnrealIRCd 6 the built-in (non-cURL) implementation
     is used for remote includes, which already used these defaults.
-    Also note that most distros, like Ubuntu and Debian, already disabled
-    TLSv1.2 effectively in cURL.
-  * Regarding ecdh-curves with the default configuration: we now try setting
-    the curves list to `x25519:secp521r1:secp384r1:prime256v1` first, and if
-    that fails then we try `secp521r1:secp384r1:prime256v1`. The former could
-    fail due to SSL library restrictions (old library or when in FIPS mode).
+    Also note that most distros, like Ubuntu and Debian, already required
+    TLSv1.2 or later effectively in cURL.
+  * Regarding default ecdh-curves: we now try to set the curves list to
+    `x25519:secp521r1:secp384r1:prime256v1` first, and if that fails then
+    we try `secp521r1:secp384r1:prime256v1`. The former could fail due to
+    SSL library restrictions (old library or when in FIPS mode).
     Previously we were also supposed to do it like that, but due to a bug
     always had X25519 turned off.
 
@@ -38,7 +40,7 @@ in UnrealIRCd 6.1.8/6.1.8.1 and 100% CPU usage in some circumstances.
   [Extended server bans](https://www.unrealircd.org/docs/Extended_server_bans)
 
 ### Developers and protocol:
-* No changes
+* No changes, other than the SSL/TLS changes mentioned earlier.
 
 UnrealIRCd 6.1.8.1
 -------------------
