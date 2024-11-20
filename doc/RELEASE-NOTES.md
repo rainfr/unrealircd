@@ -1,7 +1,5 @@
-UnrealIRCd 6.1.9-git
-===================
-This is the git version.
-
+UnrealIRCd 6.1.9
+=================
 This release fixes a number of bugs such as IPv6 hosts not resolving
 in UnrealIRCd 6.1.8/6.1.8.1 and 100% CPU usage in some circumstances.
 It also changes the SSL/TLS defaults to make things a little safer/better.
