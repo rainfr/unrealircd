@@ -36,6 +36,8 @@ It also changes the SSL/TLS defaults to make things a little safer/better.
   LibreSSL to 4.0.0.
 * Added `HELPOP EXTSERVERBANS` to explain
   [Extended server bans](https://www.unrealircd.org/docs/Extended_server_bans)
+* Added
+  [new UnrealIRCd PGP release signing key](https://forums.unrealircd.org/viewtopic.php?p=40832)
 
 ### Developers and protocol:
 * No changes, other than the SSL/TLS changes mentioned earlier.
