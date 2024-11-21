@@ -1,6 +1,9 @@
-UnrealIRCd 6.1.9
-=================
-This release fixes a number of bugs such as IPv6 hosts not resolving
+UnrealIRCd 6.1.9.1
+===================
+(UnrealIRCd 6.1.9.1 fixes a bug in the SSL ciphers of 6.1.9, rest of
+ the 6.1.9 release notes are below)
+
+This 6.1.9 release fixes a number of bugs such as IPv6 hosts not resolving
 in UnrealIRCd 6.1.8/6.1.8.1 and 100% CPU usage in some circumstances.
 It also changes the SSL/TLS defaults to make things a little safer/better.
 
