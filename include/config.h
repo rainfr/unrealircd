@@ -258,7 +258,7 @@
 /* Default TLS cipherlist (except for TLS1.3, see further down).
  * This can be changed via set::ssl::options::ciphers in the config file.
  */
-#define UNREALIRCD_DEFAULT_CIPHERS "ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256"
+#define UNREALIRCD_DEFAULT_CIPHERS "ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256"
 
 /* Default TLS 1.3 ciphersuites.
  * This can be changed via set::ssl::options::ciphersuites in the config file.
