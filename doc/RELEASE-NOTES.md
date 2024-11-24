@@ -1,5 +1,23 @@
+UnrealIRCd 6.1.10-git
+===============
+
+This is the git version (development version). This is work
+in progress and may not always be a stable version.
+
+### Enhancements:
+* TODO
+
+### Changes:
+* TODO
+
+### Fixes:
+* TODO
+
+### Developers and protocol:
+* TODO
+
 UnrealIRCd 6.1.9.1
-===================
+-------------------
 (UnrealIRCd 6.1.9.1 fixes a bug in the TLS ciphers of 6.1.9. The original
  6.1.9 release notes are below)
 
