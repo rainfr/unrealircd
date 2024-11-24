@@ -865,7 +865,7 @@ nickkill2done:
 
 	serv = client;
 	client = make_client(serv->direction, serv);
-	strlcpy(client->id, parv[6], IDLEN);
+	strlcpy(client->id, parv[6], sizeof(client->id));
 	add_client_to_list(client);
 	add_to_id_hash_table(client->id, client);
 	client->lastnick = atol(parv[3]);
