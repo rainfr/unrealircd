@@ -151,6 +151,31 @@ $CONF || exit 1
 cd "$UNREALCWD"
 
 if [ "$QUICK" != "1" ] ; then
+	if [ ! -f "$CONFDIR/unrealircd.conf" ]; then
+		echo ""
+		echo "You don't have an 'unrealircd.conf' yet in $CONFDIR"
+		echo "Shall I put the example configuration file there?"
+		echo "If so, enter the two letter language code that you want, or just press ENTER for English. Answer 'none' to skip."
+		AVLANGS="en"
+		cd doc/conf/examples 1>/dev/null 2>&1
+		for lang in example.??.conf
+		do
+			ADDTHIS=$(echo "$lang"|sed 's/example.//g'|sed 's/.conf//g')
+			AVLANGS="$AVLANGS $ADDTHIS"
+		done
+		cd - 1>/dev/null 2>&1
+		echo "The available options are: $AVLANGS none"
+		echo $n "[en] -> $c"
+		read cc
+		if [ "$cc" = "none" ]; then
+			echo "Example config not copied."
+		elif [ "$cc" = "en" -o "$cc" = "" ]; then
+			cp doc/conf/examples/example.conf $CONFDIR/unrealircd.conf
+		else
+			cp doc/conf/examples/example.$cc.conf $CONFDIR/unrealircd.conf
+		fi
+	fi
+
 	if [ ! -f $CONFDIR/tls/server.cert.pem -a ! -f $CONFDIR/ssl/server.cert.pem ]; then
 		export OPENSSLPATH
 		if [ "$GENCERTIFICATE" = 1 ]; then
@@ -776,7 +801,6 @@ while [ -z "$TEST" ] ; do
 	esac
 done
 
-echo ""
 TEST=""
 while [ -z "$TEST" ] ; do
 	TEST="$MAXCONNECTIONS_REQUEST"
