@@ -1008,6 +1008,7 @@ extern char *md5hash(char *dst, const char *src, unsigned long n);
 extern char *sha256hash(char *dst, const char *src, unsigned long n);
 extern void sha256hash_binary(char *dst, const char *src, unsigned long n);
 extern void sha1hash_binary(char *dst, const char *src, unsigned long n);
+extern void binarytohex(void *data, size_t len, char *str);
 extern MODVAR TKL *tklines[TKLISTLEN];
 extern MODVAR TKL *tklines_ip_hash[TKLIPHASHLEN1][TKLIPHASHLEN2];
 extern const char *cmdname_by_spamftarget(int target);
