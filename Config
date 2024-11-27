@@ -52,6 +52,7 @@ fi
 
 mkdir -p $TMPDIR
 mkdir -p $PRIVATELIBDIR
+mkdir -p $CONFDIR
 
 # Do this even if we're not in advanced mode
 if [ "$ADVANCED" = "1" ] ; then
