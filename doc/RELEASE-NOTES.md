@@ -1,10 +1,93 @@
-UnrealIRCd 6.1.8-rc1
-=====================
+UnrealIRCd 6.1.10-git
+===============
 
-This is the Release Candidate (RC) for future UnrealIRCd version 6.1.8.
-The actual 6.1.8 stable release will be around mid-October.
-Testing of this RC is appreciated. If you find anything, please report
-the issue at https://bugs.unrealircd.org.
+This is the git version (development version). This is work
+in progress and may not always be a stable version.
+
+### Enhancements:
+* TODO
+
+### Changes:
+* TODO
+
+### Fixes:
+* TODO
+
+### Developers and protocol:
+* TODO
+
+UnrealIRCd 6.1.9.1
+-------------------
+(UnrealIRCd 6.1.9.1 fixes a bug in the TLS ciphers of 6.1.9. The original
+ 6.1.9 release notes are below)
+
+This 6.1.9 release fixes a number of bugs such as IPv6 hosts not resolving
+in UnrealIRCd 6.1.8/6.1.8.1 and 100% CPU usage in some circumstances.
+It also changes the SSL/TLS defaults to make things a little safer/better.
+
+### Enhancements:
+* SSL/TLS:
+  * Change [default TLS ciphers](https://www.unrealircd.org/docs/TLS_Ciphers_and_protocols)
+    to only allow AES in GCM mode and no longer in CBC mode.
+  * When using cURL for [remote includes](https://www.unrealircd.org/docs/Remote_includes)
+    we now explicitly set the minimum required version to TLSv1.2 and set our
+    default ciphers and ciphersuites.
+    Note that by default in UnrealIRCd 6 the built-in (non-cURL) implementation
+    is used for remote includes, which already used these defaults.
+    Also note that most distros, like Ubuntu and Debian, already required
+    TLSv1.2 or later effectively in cURL.
+  * Regarding default ecdh-curves: we now try to set the curves list to
+    `x25519:secp521r1:secp384r1:prime256v1` first, and if that fails then
+    we try `secp521r1:secp384r1:prime256v1`. The former could fail due to
+    SSL library restrictions (old library or when in FIPS mode).
+    Previously we were also supposed to do it like that, but due to a bug
+    always had X25519 turned off.
+
+### Fixes:
+* IPv6 hosts not resolving in UnrealIRCd 6.1.8 and 6.1.8.1.
+* 100% CPU usage in some (rare) circumstances. The IRCd is still fully
+  responsive, but of course high CPU usage is never good.
+* Crash in `STATS S` (IRCOp-only) if having vhosts with autologin
+  (and no vhost::login).
+* The Windows version did not allow tweaking of set::tls::ecdh-curves.
+
+### Changes:
+* Update shipped libraries: c-ares to 1.34.3
+* Update Windows libraries: c-ares to 1.34.3, curl to 8.11.0 and
+  LibreSSL to 4.0.0.
+* Added `HELPOP EXTSERVERBANS` to explain
+  [Extended server bans](https://www.unrealircd.org/docs/Extended_server_bans)
+* Added
+  [new UnrealIRCd PGP release signing key](https://forums.unrealircd.org/viewtopic.php?p=40832)
+
+### Developers and protocol:
+* No changes, other than the SSL/TLS changes mentioned earlier.
+
+UnrealIRCd 6.1.8.1
+-------------------
+UnrealIRCd 6.1.8.1 is a dot release, it fixes:
+* If you have a vhost block without vhost::login, because you use the
+  new auto-vhost functionality, then the IRCd will crash upon
+  processing regular VHOST requests.
+* Strings were accidentally being lowercased in vhost::vhost,
+  blacklist::reason and some other places.
+
+The 6.1.8.1 release is mostly for new installs. Existing 6.1.8 users
+can fix the two bugs without needing to restart by running:  
+`./unrealircd hot-patch auto-vhost-618`
+
+For all the other fixes and new functionality, see the 6.1.8 release notes
+below.
+
+UnrealIRCd 6.1.8
+-----------------
+
+This release fixes a number of bugs. It also adds a new extban `~inherit` and
+auto-login support for vhosts.
+
+Do you like UnrealIRCd?
+Consider [making a donation](https://www.unrealircd.org/index/donations) or
+order something from the [shop](https://shop.unrealircd.org/).
 
 ### Enhancements:
 * New [Extended ban](https://www.unrealircd.org/docs/Extended_bans#Group_4:_special)

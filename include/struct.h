@@ -224,7 +224,8 @@ typedef enum LogFieldType {
 	LOG_FIELD_STRING,
 	LOG_FIELD_CLIENT,
 	LOG_FIELD_CHANNEL,
-	LOG_FIELD_OBJECT
+	LOG_FIELD_OBJECT,
+	LOG_FIELD_OBJECT_NOFREE
 } LogFieldType;
 
 typedef struct LogData {

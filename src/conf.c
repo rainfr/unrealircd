@@ -1792,9 +1792,6 @@ void config_setdefaultsettings(Configuration *i)
 	safe_strdup(i->tls_options->ciphers, UNREALIRCD_DEFAULT_CIPHERS);
 	safe_strdup(i->tls_options->ciphersuites, UNREALIRCD_DEFAULT_CIPHERSUITES);
 	i->tls_options->protocols = TLS_PROTOCOL_TLSV1_2|TLS_PROTOCOL_TLSV1_3; /* TLSv1.2 & TLSv1.3 */
-#ifdef HAS_SSL_CTX_SET1_CURVES_LIST
-	safe_strdup(i->tls_options->ecdh_curves, UNREALIRCD_DEFAULT_ECDH_CURVES);
-#endif
 	safe_strdup(i->tls_options->outdated_protocols, "TLSv1,TLSv1.1");
 	/* the following may look strange but "AES*" matches all
 	 * AES ciphersuites that do not have Forward Secrecy.

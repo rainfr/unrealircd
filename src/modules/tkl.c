@@ -1804,7 +1804,7 @@ void cmd_tkl_line(Client *client, int parc, const char *parv[], char *type)
 	Client *acptr = NULL;
 	const char *mask;
 	const char *error;
-	char mo[64], mo2[64];
+	char mo[64], mo2[64], reasonbuf[512];
 	char *p, *usermask, *hostmask;
 	const char *tkllayer[10] = {
 		me.name,		/*0  server.name */
@@ -1849,8 +1849,7 @@ void cmd_tkl_line(Client *client, int parc, const char *parv[], char *type)
 	}
 
 	secs = 0;
-
-	if (add && (parc > 3))
+	if (add && (parc >= 3))
 	{
 		secs = config_checkval(parv[2], CFG_TIME);
 		if (secs < 0)
@@ -1878,11 +1877,22 @@ void cmd_tkl_line(Client *client, int parc, const char *parv[], char *type)
 		ircsnprintf(mo2, sizeof(mo2), "%lld", (long long)TStime());
 		tkllayer[6] = mo;
 		tkllayer[7] = mo2;
-		if (parc > 3) {
-			tkllayer[8] = parv[3];
-		} else if (parc > 2) {
-			tkllayer[8] = parv[2];
+
+		if (parc > 2 && !secs && (parv[2][0] != '0'))
+		{
+			if (parc > 3)
+			{
+				snprintf(reasonbuf, sizeof(reasonbuf), "%s %s", parv[2], parv[3]);
+				tkllayer[8] = reasonbuf;
+			} else {
+				tkllayer[8] = parv[2];
+			}
 		}
+		else if (parc > 3)
+		{
+			tkllayer[8] = parv[3];
+		}
+
 		/* Blerghhh... */
 		i = atol(mo);
 		t = gmtime(&i);
